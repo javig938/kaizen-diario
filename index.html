@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Kaizen Diario · Mejora Continua</title>
+  <meta name="description" content="Mejora continua diaria con el método Kaizen y ciclo PDCA. Registra tu 1% cada día." />
+  <meta name="theme-color" content="#16a34a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Kaizen" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon-192.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">改</div>
+        <div>
+          <h1>Kaizen Diario</h1>
+          <span>Mejora continua · 1% cada día</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" id="theme-toggle" title="Cambiar tema" onclick="toggleTheme()">🌙</button>
+        <div class="streak-badge">
+          <span class="fire">🔥</span>
+          <span id="streak-count">0</span> días
+        </div>
+      </div>
+    </header>
+
+    <div class="quote" id="daily-quote">
+      "La mejora continua es mejor que la perfección retrasada." — <strong>Kaizen</strong>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="hoy">Hoy</button>
+      <button class="tab" data-tab="mejoras">Mejoras</button>
+      <button class="tab" data-tab="pdca">Ciclo PDCA</button>
+      <button class="tab" data-tab="progreso">Progreso</button>
+      <button class="tab" data-tab="ajustes">Ajustes</button>
+    </div>
+
+    <div id="tab-hoy" class="tab-content">
+      <div class="card">
+        <h2><span class="icon">✨</span> Pequeña mejora de hoy</h2>
+        <p class="section-desc">Registra una mejora pequeña (aunque sea de 1%). Lo importante es la constancia.</p>
+        <div class="form-group">
+          <label>¿Qué pequeña mejora hiciste o vas a hacer hoy?</label>
+          <textarea id="today-improvement" placeholder="Ej: Organicé mi escritorio durante 5 minutos..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Área</label>
+            <select id="today-area">
+              <option value="trabajo">Trabajo / Procesos</option>
+              <option value="personal">Hábitos personales</option>
+              <option value="salud">Salud / Energía</option>
+              <option value="aprendizaje">Aprendizaje</option>
+              <option value="equipo">Equipo / Comunicación</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Impacto percibido</label>
+            <select id="today-impact">
+              <option value="1">Muy pequeño</option>
+              <option value="2">Pequeño</option>
+              <option value="3" selected>Moderado</option>
+              <option value="4">Notable</option>
+              <option value="5">Significativo</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveTodayEntry()">Guardar mejora de hoy</button>
+      </div>
+      <div class="card">
+        <h2><span class="icon">📝</span> Reflexión rápida</h2>
+        <div class="form-group">
+          <label>¿Qué aprendiste hoy? (opcional)</label>
+          <textarea id="today-reflection" placeholder="Una frase sobre lo que observaste..."></textarea>
+        </div>
+        <button class="btn btn-secondary" onclick="saveReflection()">Guardar reflexión</button>
+      </div>
+      <div class="card hidden" id="today-summary">
+        <h2><span class="icon">✅</span> Resumen de hoy</h2>
+        <div id="today-summary-content"></div>
+      </div>
+    </div>
+
+    <div id="tab-mejoras" class="tab-content hidden">
+      <div class="card">
+        <h2><span class="icon">💡</span> Ideas de mejora</h2>
+        <p class="section-desc">Captura ideas cuando las tengas. Luego conviértelas en acciones con el ciclo PDCA.</p>
+        <div class="form-group">
+          <label>Nueva idea</label>
+          <input type="text" id="new-idea" placeholder="Describe la idea de mejora..." />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Área</label>
+            <select id="idea-area">
+              <option value="trabajo">Trabajo / Procesos</option>
+              <option value="personal">Hábitos personales</option>
+              <option value="salud">Salud / Energía</option>
+              <option value="aprendizaje">Aprendizaje</option>
+              <option value="equipo">Equipo / Comunicación</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-end;">
+            <button class="btn btn-primary" style="width:100%" onclick="addIdea()">Agregar idea</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2><span class="icon">📋</span> Lista de mejoras</h2>
+        <ul class="improvement-list" id="ideas-list"></ul>
+        <div class="empty hidden" id="ideas-empty">
+          <div class="emoji">🌱</div>
+          <p>Aún no hay ideas. ¡Agrega la primera!</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-pdca" class="tab-content hidden">
+      <div class="card">
+        <h2><span class="icon">🔄</span> Ciclo PDCA / PHVA</h2>
+        <p class="section-desc">Planificar → Hacer → Verificar → Actuar.</p>
+        <div class="pdca-steps">
+          <div class="pdca-step active" data-step="plan" onclick="selectPdcaStep('plan')"><div class="letter">P</div><div class="name">Planificar</div></div>
+          <div class="pdca-step" data-step="do" onclick="selectPdcaStep('do')"><div class="letter">H</div><div class="name">Hacer</div></div>
+          <div class="pdca-step" data-step="check" onclick="selectPdcaStep('check')"><div class="letter">V</div><div class="name">Verificar</div></div>
+          <div class="pdca-step" data-step="act" onclick="selectPdcaStep('act')"><div class="letter">A</div><div class="name">Actuar</div></div>
+        </div>
+        <div id="pdca-form">
+          <div class="form-group">
+            <label>Título de la mejora</label>
+            <input type="text" id="pdca-title" placeholder="Ej: Reducir tiempo de respuesta a emails" />
+          </div>
+          <div class="form-group">
+            <label id="pdca-label">Plan: ¿Qué vas a cambiar y cómo lo medirás?</label>
+            <textarea id="pdca-content" placeholder="Describe el plan..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Métrica / Indicador (opcional)</label>
+              <input type="text" id="pdca-metric" placeholder="Ej: minutos promedio de respuesta" />
+            </div>
+            <div class="form-group">
+              <label>Meta numérica (opcional)</label>
+              <input type="number" id="pdca-goal" placeholder="Ej: 30" />
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="savePdca()">Guardar ciclo PDCA</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2><span class="icon">📌</span> Ciclos activos</h2>
+        <ul class="improvement-list" id="pdca-list"></ul>
+        <div class="empty hidden" id="pdca-empty">
+          <div class="emoji">🔄</div>
+          <p>No hay ciclos PDCA activos. ¡Crea el primero!</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-progreso" class="tab-content hidden">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Mejoras registradas</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-streak">0</div><div class="stat-label">Racha actual</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-ideas">0</div><div class="stat-label">Ideas capturadas</div></div>
+      </div>
+      <div class="card">
+        <h2><span class="icon">📅</span> Calendario de constancia (últimos 28 días)</h2>
+        <div class="heatmap" id="heatmap"></div>
+      </div>
+      <div class="card">
+        <h2><span class="icon">🏆</span> Historial reciente</h2>
+        <ul class="improvement-list" id="history-list"></ul>
+        <div class="empty hidden" id="history-empty">
+          <div class="emoji">📜</div>
+          <p>Aún no hay historial. Empieza a registrar mejoras diarias.</p>
+        </div>
+      </div>
+      <div class="card">
+        <button class="btn btn-secondary" onclick="exportData()" style="width:100%;margin-bottom:10px;">Exportar datos (JSON)</button>
+        <button class="btn btn-danger" onclick="resetAllData()" style="width:100%;">Borrar todos los datos</button>
+      </div>
+    </div>
+
+    <div id="tab-ajustes" class="tab-content hidden">
+      <div class="card">
+        <h2><span class="icon">🎨</span> Apariencia</h2>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Modo claro</div>
+            <div class="toggle-desc">Cambia entre tema oscuro y claro</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="light-mode-toggle" onchange="setTheme(this.checked ? 'light' : 'dark')">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="card" id="install-card">
+        <h2><span class="icon">📱</span> Instalar como app</h2>
+        <p class="section-desc">Instala Kaizen Diario en tu celular o computadora.</p>
+        <button class="btn btn-primary" id="install-btn" onclick="promptInstall()" style="width:100%;">Instalar Kaizen Diario</button>
+        <p id="install-status" style="margin-top: 12px; font-size: 0.85rem; color: var(--text-muted);">
+          Si el botón no aparece, usa el menú del navegador: “Agregar a la pantalla de inicio”.
+        </p>
+      </div>
+      <div class="card">
+        <h2><span class="icon">🔔</span> Recordatorios</h2>
+        <p class="section-desc">Recibe un aviso diario para registrar tu mejora.</p>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Activar recordatorios</div>
+            <div class="toggle-desc">Notificación diaria para no olvidar tu 1%</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="reminder-toggle" onchange="toggleReminders(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Hora del recordatorio</div>
+            <div class="toggle-desc">Horario preferido (hora local)</div>
+          </div>
+          <input type="time" class="time-input" id="reminder-time" value="20:00" onchange="saveReminderTime()">
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Solo si no registré hoy</div>
+            <div class="toggle-desc">No molestar si ya guardaste una mejora hoy</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="reminder-only-missing" checked onchange="saveReminderPrefs()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn btn-secondary" onclick="requestNotificationPermission()">Permitir notificaciones</button>
+          <button class="btn btn-primary" onclick="testNotification()">Probar notificación</button>
+        </div>
+        <p id="notif-status" style="margin-top: 12px; font-size: 0.85rem; color: var(--text-muted);"></p>
+      </div>
+      <div class="card">
+        <h2><span class="icon">ℹ️</span> Sobre Kaizen Diario</h2>
+        <p class="section-desc" style="margin-bottom: 0;">
+          Aplicación de mejora continua basada en el método Kaizen y el ciclo PDCA.
+          Los datos se guardan solo en tu navegador. No se envían a ningún servidor.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h3 id="modal-title">Actualizar ciclo</h3>
+      <div class="form-group">
+        <label>Estado actual</label>
+        <select id="modal-step">
+          <option value="plan">P — Planificar</option>
+          <option value="do">H — Hacer</option>
+          <option value="check">V — Verificar</option>
+          <option value="act">A — Actuar</option>
+          <option value="done">Completado / Estandarizado</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Notas de avance</label>
+        <textarea id="modal-notes" placeholder="Qué pasó en esta etapa..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="updatePdcaFromModal()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
